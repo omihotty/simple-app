@@ -1,16 +1,26 @@
 pipeline {
     agent any
     tools {
-        maven 'maven3'
+        maven 'maven'
+	    jdk 'java'
     }
-    options {
-        buildDiscarder logRotator(daysToKeepStr: '5', numToKeepStr: '7')
-    }
+//    options {
+//        buildDiscarder logRotator(daysToKeepStr: '5', numToKeepStr: '7')
+//    }
+
     stages{
+
+        stage('scm'){
+            steps{
+                git 'https://github.com/javahometech/simple-app'
+            }
+            
+        }
+
         stage('Build'){
             steps{
-                 sh script: 'mvn clean package'
-                 archiveArtifacts artifacts: 'target/*.war', onlyIfSuccessful: true
+                 sh 'mvn clean package'
+//                 archiveArtifacts artifacts: 'target/*.war', onlyIfSuccessful: true
             }
         }
         stage('Upload War To Nexus'){
@@ -18,7 +28,7 @@ pipeline {
                 script{
 
                     def mavenPom = readMavenPom file: 'pom.xml'
-                    def nexusRepoName = mavenPom.version.endsWith("SNAPSHOT") ? "simpleapp-snapshot" : "simpleapp-release"
+                    def nexusRepoName = mavenPom.version.endsWith("SNAPSHOT") ? "Jenkinsartivactssnap" : "Jenkinsartifacts"
                     nexusArtifactUploader artifacts: [
                         [
                             artifactId: 'simple-app', 
@@ -27,9 +37,9 @@ pipeline {
                             type: 'war'
                         ]
                     ], 
-                    credentialsId: 'nexus3', 
+                    credentialsId: 'ac1d7202-b847-4f4a-aed4-6a1c6c3dedb5', 
                     groupId: 'in.javahome', 
-                    nexusUrl: '172.31.15.204:8081', 
+                    nexusUrl: '192.168.43.168:8081', 
                     nexusVersion: 'nexus3', 
                     protocol: 'http', 
                     repository: nexusRepoName, 
